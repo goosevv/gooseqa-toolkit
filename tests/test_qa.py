@@ -21,7 +21,7 @@ class QA(unittest.TestCase):
     def test_invalid_link(self):
         with self.assertRaises(ValueError):self.add('case',title='bad',kind='UI',priority='P0',risk_id='unknown',steps='x',expected='y')
     def test_bug_review_gate(self):
-        b=self.add('bug',title='defect',severity='P0',details='unexpected');self.add('note',stage=6,text='review');self.assertFalse(qa.snapshot()['projects'][0]['gates'][6]);self.add('bug-status',id=b['id'],status='CLOSED');self.assertTrue(qa.snapshot()['projects'][0]['gates'][6])
+        b=self.add('bug',title='defect',severity='P0',details='unexpected');self.add('note',stage=6,text='review');self.assertFalse(qa.snapshot()['projects'][0]['gates'][6]);self.add('bug-status',id=b['id'],status='CLOSED');self.assertFalse(qa.snapshot()['projects'][0]['gates'][6])  # closing P0 is not sufficient without a current review
     def test_demo(self):self.assertTrue(qa.demo()['demo']);self.assertIn('DEMO',qa.report(qa.read()['projects'][-1]))
     def test_learning(self):
         t=self.add('task',title='first task');self.add('task-status',id=t['id'],done=True);self.assertTrue(qa.read()['projects'][0]['tasks'][0]['done'])
