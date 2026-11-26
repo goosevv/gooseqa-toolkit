@@ -11,9 +11,9 @@ For every Codex invocation, including resumed sessions, read the bundled `refere
 
 ## Commands
 Interpret the words after `$gooseqa` (Codex) or `/gooseqa` (Claude Code):
-- `start [LEARN|PAIR|AUTO]`: FIRST execute `python "<skill>/scripts/qa.py" start [MODE]` from the target root (omit MODE if absent). This creates/resumes the workspace, starts or reuses a detached local dashboard and requests browser opening. Parse returned JSON; give the URL and project ID immediately. If browser launch is denied, use `--no-browser` or provide the URL/command. Do not claim a running server without a successful result. Then inspect project and begin or resume the recorded stage; default LEARN for new projects, existing mode otherwise. When no mode is specified on a new project, explain mode choices and ask before implementation. Respect mode changes saved in dashboard by re-reading `list` before each stage. Save actual notes and tasks as soon as available. Never reset progress on start.
+- `start [LEARN|PAIR|AUTO]`: FIRST execute `python "<skill>/scripts/qa.py" start [MODE] --no-browser` from the target root (omit MODE if absent). This creates/resumes the workspace, starts or reuses a detached local dashboard without opening an external browser. Parse returned JSON; give the URL and project ID immediately, then follow the dashboard opening procedure below. Do not claim a running server without a successful result. Then inspect project and begin or resume the recorded stage; default LEARN for new projects, existing mode otherwise. When no mode is specified on a new project, explain mode choices and ask before implementation. Respect mode changes saved in dashboard by re-reading `list` before each stage. Save actual notes and tasks as soon as available. Never reset progress on start.
 - `status`: show actual recorded progress, unresolved risks, next step; do not change anything.
-- `dashboard`: run `python "<skill>/scripts/qa.py" dashboard` from the target root; it opens/reuses the local workspace. Give the returned URL. If a server cannot be started, provide exact command and do not claim it is running.
+- `dashboard`: run `python "<skill>/scripts/qa.py" dashboard --no-browser` from the target root; it starts/reuses the local workspace. Give the returned URL and follow the dashboard opening procedure below. If a server cannot be started, provide exact command and do not claim it is running.
 - `plan`: risk analysis, test design, proposed coverage and tool selection. No product edits.
 - `next`: perform the next pending step in selected mode.
 - `run`: execute only relevant existing tests in an isolated environment; record actual case-level evidence.
@@ -21,6 +21,9 @@ Interpret the words after `$gooseqa` (Codex) or `/gooseqa` (Claude Code):
 - `report`: export Markdown using `report PROJECT_ID`.
 - `mode LEARN|PAIR|AUTO`: change selected project mode.
 Natural-language arguments are allowed. Resolve existing project by repo path/name; if ambiguous, ask which. Never create duplicate records on every invocation.
+
+## Dashboard opening (client-aware)
+After a successful start or dashboard command, prefer the host's in-app browser or preview pane. Discover the browser/preview skill and read its instructions if available; use its actual navigation/preview tool to open the returned HTTP dashboard URL (use the equivalent `http://localhost:PORT` address if the host specifically requires localhost). Do not invent tool names, use file://, or claim the pane opened unless the tool confirms it. Reopen on resume if necessary; do not create duplicate tabs on every QA stage. If the client cannot reach the loopback server or has no in-app browser, show the actual URL as a clickable link and explain the limitation. If an external browser is appropriate, rerun the dashboard command without `--no-browser` as a fallback. Never bind the server publicly or disable same-origin protections to make a preview work.
 
 The explicit start/dashboard request authorizes the local loopback server and browser opening; respect sandbox permission prompts. The dashboard is a status and data editor, not an agent controller. A mode change takes effect when the agent next reads state. If local processes are not permitted, provide the fallback foreground `serve` command.
 

@@ -1,1 +1,23 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GooseQA · Workspace</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head><body><div class="shell"><aside><div class="brand"><div class="mark">G<span>✓</span></div><div><strong>goose<span>qa.</span></strong><small>QUALITY WORKSPACE</small></div></div><div class="workspace-label">WORKSPACE</div><select id="projects" aria-label="Проект"></select><button id="new-project" class="secondary full">＋ Новый проект</button><nav id="nav"></nav><div class="aside-foot"><div class="live"><i></i> Локальное хранилище</div><small>Toolkit / v0.2.0</small></div></aside><main><header><div><div class="eyebrow" id="crumb">WORKSPACE / OVERVIEW</div><h1 id="heading">Обзор качества</h1></div><div class="head-actions"><button id="theme" class="secondary" aria-label="Сменить тему">◐</button><button id="export" class="secondary">↓ Отчёт</button></div></header><div id="content"></div><footer>GooseQA Toolkit · Локальные данные · Результаты записываются пользователем или агентом, не вычисляются автоматически</footer></main></div><dialog id="modal"><form id="form"><div class="dialog-head"><h2 id="modal-title"></h2><button type="button" id="close" class="secondary">×</button></div><div id="fields"></div><p id="form-error" role="alert"></p><button type="submit" class="primary full">Сохранить</button></form></dialog><div id="toast" role="status"></div></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GooseQA · Workspace</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<div class="shell">
+<aside>
+  <div class="brand"><div class="mark" aria-hidden="true">G<span><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg></span></div><div class="brand-name"><strong>GooseQA</strong><small>Quality workspace</small></div><button class="secondary nav-toggle" id="nav-toggle" type="button" aria-label="Разделы" aria-expanded="false" aria-controls="nav"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16"/></svg><span>Разделы</span></button></div>
+  <div class="project-controls"><label class="workspace-label" for="projects">Проект</label><div class="project-row"><select id="projects" aria-label="Проект"></select><button id="new-project" class="secondary" aria-label="Новый проект" title="Новый проект"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg><span>Новый</span></button></div></div>
+  <nav id="nav" aria-label="Разделы QA"></nav>
+  <div class="aside-foot"><div class="live"><i></i> Локальное хранилище</div><small>GooseQA Toolkit · v0.2.0</small></div>
+</aside>
+<main>
+<header><div class="heading-group"><div class="eyebrow" id="crumb">Workspace</div><h1 id="heading">Обзор</h1></div><div class="head-actions"><button id="theme" class="secondary icon-button" aria-label="Сменить тему" title="Сменить тему"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></button><button id="export" class="secondary"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 15V3m9 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10l5 5l5-5"/></g></svg><span>Отчёт</span></button></div></header>
+<div id="content"></div>
+<footer>GooseQA Toolkit · Локальные данные. Результаты записываются пользователем или агентом.</footer>
+</main>
+</div>
+<dialog id="modal"><form id="form"><div class="dialog-head"><h2 id="modal-title"></h2><button type="button" id="close" class="secondary icon-button" aria-label="Закрыть"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg></button></div><div id="fields"></div><p id="form-error" role="alert"></p><button type="submit" class="primary full">Сохранить</button></form></dialog><div id="toast" role="status"></div>
+</body>
+</html>
