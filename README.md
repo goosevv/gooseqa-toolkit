@@ -4,24 +4,37 @@
 
 **From an unfamiliar codebase to a reliable test suite.**
 
-An AI-assisted QA workflow and local dashboard for learning, writing, running, and reviewing automated tests.
+An AI-assisted QA workflow that discovers risks, designs tests, implements automation,
+runs real checks, and reviews results — with a local dashboard to track every stage.
 
-![Version](https://img.shields.io/badge/version-0.2.0-087f73)
+![Runtime](https://img.shields.io/badge/runtime-v0.3.0-087f73)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 ![Codex](https://img.shields.io/badge/Agent-Codex-18181B)
+![Languages](https://img.shields.io/badge/Dashboard-EN%20%7C%20RU-087f73)
 ![Local first](https://img.shields.io/badge/local--first-yes-087f73)
 
-[Install](#installation) · [Quick start](#quick-start) · [Workflow](#workflow) · [Commands](#commands) · [Documentation](#documentation)
+[Install](#installation) · [Quick start](#quick-start) · [Workflow](#workflow) · [Dashboard](#dashboard) · [Model routing](#model-routing) · [Commands](#commands)
 
 </div>
 
 ---
 
+## Why GooseQA?
+
+- **Continuous QA workflow** — run eight stages in AUTO mode without a separate prompt for each stage.
+- **Evidence-first testing** — record actual test results, commands, defects, and supporting evidence.
+- **Adaptive model routing** — plan subagent assignments using the host's available capabilities and user preferences.
+- **Three working modes** — learn automation, collaborate with an agent, or delegate an approved QA scope.
+- **Local-first dashboard** — monitor progress, edit QA records, and configure model preferences without a hosted backend or additional AI API keys.
+- **Resumable progress** — continue from the last recorded stage instead of restarting the audit.
+
+Supports QA planning for web UI, API, unit, integration, visual, desktop, game, and AI systems. The agent selects an appropriate test stack for the project.
+
 ## Installation
 
-**Requirements:** Python 3.10+, Git, and Node.js for the skills CLI.
+Requires Python 3.10+, Git, and Node.js for the skills CLI.
 
-Install globally as a Codex skill:
+Install globally for Codex:
 
 ```sh
 npx skills add goosevv/gooseqa-toolkit --skill gooseqa -g -y -a codex
@@ -30,7 +43,7 @@ npx skills add goosevv/gooseqa-toolkit --skill gooseqa -g -y -a codex
 <details>
 <summary>Alternative installation methods</summary>
 
-**Local installer**
+### Local installer
 
 ```sh
 git clone https://github.com/goosevv/gooseqa-toolkit.git
@@ -38,23 +51,25 @@ cd gooseqa-toolkit
 python qa.py install-skill codex --global
 ```
 
-Use `py -3` on Windows or `python3` on Linux/macOS if needed. Replace `--global` with `--project /path/to/project` for project-level installation.
+Use `py -3` on Windows or `python3` when necessary. Replace `--global` with `--project /path/to/project` for a project-level installation.
 
-**Codex plugin (experimental)**
+### Codex plugin (experimental)
 
 ```sh
 codex plugin marketplace add goosevv/gooseqa-toolkit
 ```
 
-Install GooseQA Toolkit from the added marketplace in Codex. Native marketplace installation has not yet been verified.
+Select GooseQA Toolkit from the added marketplace. Native marketplace installation still requires verification.
 
-**Claude Code (experimental)**
+### Claude Code (experimental)
+
+From the cloned repository:
 
 ```sh
 python qa.py install-skill claude --global
 ```
 
-Run `/gooseqa start` inside Claude Code. Universal model routing is available; native delegation depends on the current host.
+Invoke `/gooseqa start` in Claude Code.
 
 Choose one installation method per agent to avoid duplicate skills.
 
@@ -62,19 +77,19 @@ Choose one installation method per agent to avoid duplicate skills.
 
 ## Quick start
 
-Open a target project in Codex and invoke:
+Open the project you want to test in Codex:
 
 ```text
-$gooseqa start
+$gooseqa start AUTO
 ```
 
-GooseQA creates or resumes the QA workspace, starts a local dashboard, prefers the agent’s in-app browser when supported, and guides the agent through the next QA stage.
+GooseQA creates or resumes the local QA workspace, opens the dashboard when supported, and starts the workflow within the approved testing scope.
 
-| Mode | Purpose |
-| --- | --- |
-| **LEARN** | Guided exercises, hints, and feedback. |
-| **PAIR** | Collaborate on test design and implementation. |
-| **AUTO** | Delegate an approved testing scope to the agent. |
+| Mode | Best for | Behavior |
+| --- | --- | --- |
+| **LEARN** | Learning automation | Exercises, hints, and feedback. Pauses for your attempts. |
+| **PAIR** | Collaborative QA | Works with you and pauses for required decisions. |
+| **AUTO** | Delegating QA | Continues across stages until completion or a real blocker. |
 
 ```text
 $gooseqa start LEARN
@@ -82,90 +97,116 @@ $gooseqa start PAIR
 $gooseqa start AUTO
 ```
 
-New workspaces default to LEARN. Existing workspaces retain their progress and mode. In AUTO, start and next proceed through all eight stages without routine confirmations, stopping at completion or a real blocker. This is a host-driven loop, not a detached background agent.
+Without a mode, a new workspace defaults to LEARN; an existing workspace retains its saved mode.
 
 ## Workflow
 
 ```mermaid
 flowchart TD
-    A[Project discovery] --> B[Risk analysis]
-    B --> C[Test design]
-    C --> D[Automation plan]
-    D --> E[Implementation]
-    E --> F[Execution]
-    F --> G[Review]
-    G --> H[CI & reporting]
+    A[01 · Discovery] --> B[02 · Risk analysis]
+    B --> C[03 · Test design]
+    C --> D[04 · Automation plan]
+    D --> E[05 · Implementation]
+    E --> F[06 · Execution]
+    F --> G[07 · Review]
+    G --> H[08 · CI & reporting]
+    H --> I[QA report]
 ```
 
-Choose the right testing level for the project: UI, API, unit, integration, visual, desktop, game, or AI evaluation. Playwright and TypeScript are the recommended starting point for web automation.
+Each stage requires genuine completion and satisfied evidence gates. In AUTO, the agent advances automatically, attempts bounded safe corrections when blocked, and saves progress before stopping. A subsequent invocation resumes the saved stage.
 
-## Features
+The workflow runs in the active agent session; it is not a detached background AI process. Quality gates validate recorded evidence, not the correctness of the test assertions.
 
-| Capability | Description |
+## Dashboard
+
+A compact, responsive QA workspace designed for narrow in-app browser panes as well as desktop browsers.
+
+| Section | What it tracks |
 | --- | --- |
-| Project analysis | Discover architecture, requirements, risks, and existing coverage. |
-| QA dashboard | Track stages, risks, test cases, execution evidence, defects, and learning tasks. |
-| Quality gates | Check required records and evidence before advancing stages. |
-| Learning mode | Practice automation through real project tasks. |
-| Persistent workspace | Resume across agent sessions without losing progress. |
-| Local-first runtime | Python standard library, no additional AI API keys or hosted backend. |
-| Reporting | Export a Markdown QA report. |
+| Overview | Progress, coverage, recent results, open defects |
+| Workflow | Stage notes and quality gates |
+| Risks | Risk priorities and rationale |
+| Test cases | Test design, coverage, automation references |
+| Runs | Recorded results and execution evidence |
+| Defects | Open and closed bugs |
+| Learning | Exercises and completion |
+| AI Configuration | Global model routing preferences |
 
-The dashboard has a compact responsive layout, collapsible navigation in narrow panes, locally embedded Iconify (Lucide) icons, light/dark themes, and English/Russian language selection. It polls the local state every three seconds while visible and avoids refreshing focused form controls.
+Includes **English / Russian** language switching, light/dark themes, local Iconify (Lucide) icons, and Markdown report export.
+
+```text
+$gooseqa dashboard
+```
+
+The dashboard prefers the agent's in-app browser or preview when supported; otherwise the local URL can be opened manually. It displays and edits state, rather than independently launching AI work.
+
+## Model routing
+
+GooseQA separates QA roles from provider-specific model names.
+
+| Profile | Concurrent subagents (maximum) |
+| --- | ---: |
+| ECO | 0 |
+| BALANCED (default) | 2 |
+| QUALITY | 4 |
+| CUSTOM | User-defined, up to 8 |
+
+Actual delegation is limited by the host. The router plans assignments using FAST, BALANCED, REASONING, and VISION capabilities. Test execution uses deterministic CLI tools.
+
+Configure automatic or manual model selection, compatible fallback, and reasoning effort in **AI Configuration**. The original strict Codex preset remains available. Global settings are shared across projects.
+
+Codex, Claude Code, Gemini CLI, and generic/local agents share an inventory contract. Automatic provider-specific model discovery and native dispatch are not implemented: the host agent must supply observed capabilities and execute supported actions. If native delegation is unavailable, the router can plan work for the existing session, subject to the configured constraints.
+
+[Read the model routing guide](docs/model-routing.md)
 
 ## Commands
 
-| Command | Action |
+| Skill command | Purpose |
 | --- | --- |
-| `$gooseqa start [MODE]` | Start or resume a workspace and open the dashboard. |
-| `$gooseqa dashboard` | Open the dashboard. |
-| `$gooseqa status` | Inspect progress and blockers. |
-| `$gooseqa plan` | Design a risk-based test plan. |
-| `$gooseqa next` | Continue the workflow. |
-| `$gooseqa run` | Execute relevant tests through the agent. |
-| `$gooseqa review` | Review test quality and execution evidence. |
-| `$gooseqa report` | Export a QA report. |
-| `$gooseqa mode LEARN` | Change the working mode. |
+| `$gooseqa start [MODE]` | Start or resume QA and open the dashboard |
+| `$gooseqa next` | Resume work; continue in AUTO |
+| `$gooseqa dashboard` | Open the local dashboard |
+| `$gooseqa status` | Inspect progress and blockers |
+| `$gooseqa plan` | Design a risk-based test plan |
+| `$gooseqa run` | Execute relevant tests |
+| `$gooseqa review` | Review test quality and evidence |
+| `$gooseqa report` | Export a Markdown report |
+| `$gooseqa mode LEARN` | Change the working mode |
 
-These are skill arguments, not separate built-in Codex commands.
-
-## Model policy
-
-GooseQA uses a [capability-based model router](docs/model-routing.md) across hosts. Configure global preferences in AI Configuration, with ECO/BALANCED/QUALITY/CUSTOM profiles, automatic or manual mapping and the original strict Codex preset. Native delegation and model switching depend on the host; plans are not execution evidence.
-
-## Local data & development
-
-Project state lives in `.gooseqa/state.json`. Keep this directory out of version control and never store credentials or sensitive test data in it. The dashboard binds to loopback only and is not intended for public hosting.
+These are skill arguments, not separate built-in Codex commands. Claude Code uses the `/gooseqa` invocation where installed.
 
 <details>
-<summary>Run the dashboard manually or test the toolkit</summary>
+<summary>Local CLI and development</summary>
 
-From a target project's root, run the installed skill script (example for a global Codex installation):
+Run the installed script from your target project directory (example for a global Codex installation):
 
 ```sh
-python ~/.agents/skills/gooseqa/scripts/qa.py start LEARN
+python ~/.agents/skills/gooseqa/scripts/qa.py start AUTO
 ```
 
-In an agent with an in-app browser, the skill starts with `--no-browser` and opens the returned HTTP URL using the host preview/browser tools when available. Otherwise use the returned dashboard URL or the default external-browser request. Local loopback accessibility depends on the client and execution environment; no public tunnel is required or enabled.
+Use `--no-browser` when opening the returned URL through the host's preview tools.
 
 From the toolkit repository:
 
 ```sh
+python qa.py model-config
+python qa.py model-config-set settings.json
+python qa.py model-plan host.json
 python -m unittest discover -s tests -v
 node --check static/app.js
 ```
+
+Project records: `.gooseqa/state.json`. Global model preferences: `~/.gooseqa/model-settings.json` (override with `GOOSEQA_CONFIG`). Keep secrets out of both files, and keep project QA data out of version control.
+
+The dashboard binds to loopback only; it is not intended for public hosting.
 
 </details>
 
 ## Documentation
 
-- [Skill instructions](skills/gooseqa/SKILL.md)
-- [Automation guidelines](skills/gooseqa/references/automation.md)
-- [State contract](skills/gooseqa/references/state-contract.md)
-- [Model routing](docs/model-routing.md)
-- [Verification and limitations](VERIFICATION.md)
+[Skill instructions](skills/gooseqa/SKILL.md) · [Model routing](docs/model-routing.md) · [Dashboard design](docs/dashboard-design.md) · [Automation guidelines](skills/gooseqa/references/automation.md) · [State contract](skills/gooseqa/references/state-contract.md) · [Verification & limitations](VERIFICATION.md)
 
-> **Early development:** GooseQA stores and displays test evidence; the agent runs the actual tests. Quality gates validate records, not the correctness of test assertions. Native client installation, Windows behavior, and browser E2E still require verification.
+> **Early development:** native client integrations, Windows behavior, browser E2E, and the full Python test suite for the latest model router still require verification. Model plans are not proof of actual model execution. No token savings are claimed.
 
 ---
 
