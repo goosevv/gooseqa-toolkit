@@ -54,7 +54,7 @@ Install GooseQA Toolkit from the added marketplace in Codex. Native marketplace 
 python qa.py install-skill claude --global
 ```
 
-Run `/gooseqa start` inside Claude Code. A separate Claude model policy is planned.
+Run `/gooseqa start` inside Claude Code. Universal model routing is available; native delegation depends on the current host.
 
 Choose one installation method per agent to avoid duplicate skills.
 
@@ -82,7 +82,7 @@ $gooseqa start PAIR
 $gooseqa start AUTO
 ```
 
-New workspaces default to LEARN. Existing workspaces retain their progress and mode.
+New workspaces default to LEARN. Existing workspaces retain their progress and mode. In AUTO, start and next proceed through all eight stages without routine confirmations, stopping at completion or a real blocker. This is a host-driven loop, not a detached background agent.
 
 ## Workflow
 
@@ -111,7 +111,7 @@ Choose the right testing level for the project: UI, API, unit, integration, visu
 | Local-first runtime | Python standard library, no additional AI API keys or hosted backend. |
 | Reporting | Export a Markdown QA report. |
 
-The dashboard has a compact responsive layout, collapsible navigation in narrow panes, locally embedded Iconify (Lucide) icons, light/dark themes, and a Russian-language interface. It polls the local state every three seconds while visible and avoids refreshing focused form controls.
+The dashboard has a compact responsive layout, collapsible navigation in narrow panes, locally embedded Iconify (Lucide) icons, light/dark themes, and English/Russian language selection. It polls the local state every three seconds while visible and avoids refreshing focused form controls.
 
 ## Commands
 
@@ -131,9 +131,7 @@ These are skill arguments, not separate built-in Codex commands.
 
 ## Model policy
 
-GooseQA includes a shared [Codex model and delegation policy](docs/codex-model-policy.md) for every project and mode. It favors bounded delegation and Medium effort or lower.
-
-The policy is instructional: native subagent orchestration, automatic model switching, and token telemetry are not implemented yet.
+GooseQA uses a [capability-based model router](docs/model-routing.md) across hosts. Configure global preferences in AI Configuration, with ECO/BALANCED/QUALITY/CUSTOM profiles, automatic or manual mapping and the original strict Codex preset. Native delegation and model switching depend on the host; plans are not execution evidence.
 
 ## Local data & development
 
@@ -164,7 +162,7 @@ node --check static/app.js
 - [Skill instructions](skills/gooseqa/SKILL.md)
 - [Automation guidelines](skills/gooseqa/references/automation.md)
 - [State contract](skills/gooseqa/references/state-contract.md)
-- [Model policy](docs/codex-model-policy.md)
+- [Model routing](docs/model-routing.md)
 - [Verification and limitations](VERIFICATION.md)
 
 > **Early development:** GooseQA stores and displays test evidence; the agent runs the actual tests. Quality gates validate records, not the correctness of test assertions. Native client installation, Windows behavior, and browser E2E still require verification.

@@ -4,8 +4,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 from urllib.request import build_opener, ProxyHandler
 import hashlib, subprocess, webbrowser, shutil
+import model_router
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = pathlib.Path(os.environ.get('GOOSEQA_DATA', pathlib.Path.cwd() / '.gooseqa')).resolve()
@@ -134,6 +135,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path=='/api/health':return self.send(200,{'app':'gooseqa','version':VERSION,'workspace':workspace_id()})
             if path=='/api/state':return self.send(200,snapshot())
+            if path=='/api/models':return self.send(200,model_router.load())
             if path.startswith('/api/report/'):
                 p=project(read(),path.split('/')[-1]);return self.send(200,report(p).encode(),'text/plain; charset=utf-8')
             files={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css')}
@@ -148,7 +150,8 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get_content_type()!='application/json':raise ValueError('Expected JSON')
             n=int(self.headers.get('Content-Length','0'))
             if not 0<n<=100000:raise ValueError('Invalid payload size')
-            d=json.loads(self.rfile.read(n));self.send(200,apply(self.path.split('/')[-1],d))
+            d=json.loads(self.rfile.read(n));action=self.path.split('/')[-1]
+            self.send(200,model_router.save(d) if action=='model-config' else apply(action,d))
         except (ValueError,KeyError,TypeError,OSError) as e:self.send(400,{'error':str(e)})
 
 def workspace_id():
@@ -229,6 +232,9 @@ def main():
         p=sub.add_parser(cmd);p.add_argument('--port',type=int,default=8766);p.add_argument('--no-browser',action='store_true')
         if cmd=='start':p.add_argument('mode',nargs='?',choices=MODES)
     sub.add_parser('list');sub.add_parser('demo');p=sub.add_parser('report');p.add_argument('project_id');p=sub.add_parser('apply',help='Apply a validated action from JSON file or stdin (-)');p.add_argument('action');p.add_argument('file');p=sub.add_parser('install-skill');p.add_argument('target',choices=['codex','claude','both']);p.add_argument('--project',default='.');p.add_argument('--global',dest='global_scope',action='store_true')
+    sub.add_parser('model-config')
+    p=sub.add_parser('model-config-set');p.add_argument('file')
+    p=sub.add_parser('model-plan');p.add_argument('file')
     a=parser.parse_args()
     try:
         if a.cmd=='serve':
@@ -238,6 +244,11 @@ def main():
             finally:server.server_close()
         elif a.cmd=='start':print(json.dumps(start(a.mode,a.port,not a.no_browser),ensure_ascii=False,indent=2))
         elif a.cmd=='dashboard':print(json.dumps(start(None,a.port,not a.no_browser),ensure_ascii=False,indent=2))
+        elif a.cmd=='model-config':print(json.dumps(model_router.load(),ensure_ascii=False,indent=2))
+        elif a.cmd in ('model-config-set','model-plan'):
+            data=json.load(sys.stdin) if a.file=='-' else json.loads(pathlib.Path(a.file).read_text(encoding='utf-8-sig'))
+            result=model_router.save(data) if a.cmd=='model-config-set' else model_router.plan(model_router.load(),data)
+            print(json.dumps(result,ensure_ascii=False,indent=2))
         elif a.cmd=='list':print(json.dumps(snapshot(),ensure_ascii=False,indent=2))
         elif a.cmd=='demo':print(demo()['id'])
         elif a.cmd=='report':print(report(project(read(),a.project_id)))
