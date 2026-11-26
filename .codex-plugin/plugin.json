@@ -1,0 +1,13 @@
+{
+  "name": "gooseqa-toolkit",
+  "version": "0.2.0",
+  "description": "Evidence-first AI QA workflow and local dashboard.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GooseQA Toolkit",
+    "shortDescription": "Plan and automate software testing.",
+    "developerName": "goosevv",
+    "category": "Productivity",
+    "brandColor": "#087F73"
+  }
+}

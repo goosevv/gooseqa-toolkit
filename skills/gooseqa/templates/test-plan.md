@@ -1,0 +1,11 @@
+# Test plan
+- Project / scope / version:
+- Confirmed requirements and sources:
+- Assumptions and open questions:
+- Risks (P0/P1/P2):
+- Existing tests and gaps:
+- Test levels / framework / rationale:
+- Environments, fixtures, accounts, cleanup:
+- Prioritized risk-to-case matrix:
+- Execution commands and acceptance gates:
+- Out of scope / remaining manual checks:

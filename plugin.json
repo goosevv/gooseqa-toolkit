@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "gooseqa-toolkit",
+  "version": "0.2.0",
+  "description": "Evidence-first AI QA workflow with a local dashboard, test planning, automation and learning.",
+  "author": {
+    "name": "goosevv"
+  },
+  "repository": "https://github.com/goosevv/gooseqa-toolkit",
+  "keywords": [
+    "qa",
+    "testing",
+    "playwright",
+    "automation"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "GooseQA Toolkit",
+        "shortDescription": "Learn, plan and automate software testing.",
+        "longDescription": "A local evidence-first QA workflow for Codex with LEARN, PAIR and AUTO modes and a live project dashboard.",
+        "developerName": "goosevv",
+        "category": "Productivity",
+        "brandColor": "#087F73",
+        "defaultPrompt": [
+          "Use GooseQA to start a QA workflow in this project."
+        ]
+      }
+    }
+  }
+}
