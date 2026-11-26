@@ -6,7 +6,7 @@ from urllib.request import build_opener, ProxyHandler
 import hashlib, subprocess, webbrowser, shutil
 import model_router
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = pathlib.Path(os.environ.get('GOOSEQA_DATA', pathlib.Path.cwd() / '.gooseqa')).resolve()
@@ -60,16 +60,89 @@ def item(rows,id):
     for x in rows:
         if x['id']==id: return x
     raise ValueError('Item not found')
+
+def git(repo,*args):
+    return subprocess.check_output(['git','-C',repo,*args],stderr=subprocess.DEVNULL,timeout=15).decode('utf-8','surrogateescape')
+
+def changed_paths(repo,base):
+    try:
+        git(repo,'merge-base','--is-ancestor',base,'HEAD')
+        changed=git(repo,'diff','--name-only','--no-renames','-z',base,'--')
+        untracked=git(repo,'ls-files','--others','--exclude-standard','-z')
+        return sorted({x for x in (changed+untracked).split('\0') if x and not x.startswith('.gooseqa/')})
+    except (OSError,subprocess.SubprocessError,UnicodeError):
+        return None
+
+def impact(p):
+    # Exact, agent-verified dependency mappings only; unknown changes fail closed.
+    all_ids=[c['id'] for c in p['cases']]
+    base=p.get('baseline')
+    def full(reason,paths=None):
+        return {'mode':'FULL','reason':reason,'paths':paths or [],'case_ids':all_ids,'baseline':base}
+    if not base:return full('No reviewed baseline')
+    paths=changed_paths(p['repo'],base)
+    if paths is None:return full('Git unavailable or baseline not an ancestor')
+    if not paths:return full('No changes identified; explicit QA request uses full suite')
+    mapping=p.get('impact_map',{})
+    if any(not mapping.get(x) for x in paths):return full('Unmapped change',paths)
+    selected={i for x in paths for i in mapping[x]}
+    if not selected.issubset(all_ids):return full('Stale mapping',paths)
+    selected.update(c['id'] for c in p['cases'] if c['priority']=='P0')
+    return {'mode':'INCREMENTAL','reason':'Every changed path mapped; P0 always included','paths':paths,'case_ids':[i for i in all_ids if i in selected],'baseline':base}
+
+def review_hash(p):
+    payload={k:p[k] for k in ('risks','cases','runs','bugs')}
+    return hashlib.sha256(json.dumps(payload,sort_keys=True,ensure_ascii=True).encode()).hexdigest()
+
+def review_ok(p):
+    r=p.get('review',{})
+    return r.get('verdict')=='ACCEPT' and r.get('fingerprint')==review_hash(p)
+
+def checkpoint(p,status='pending',detail=''):
+    p['checkpoint']={'stage':p['stage'],'status':status,'detail':detail,'updated':now()}
+
+def current_baseline(p):
+    try:
+        head=git(p['repo'],'rev-parse','HEAD').strip()
+        return head if changed_paths(p['repo'],head)==[] else None
+    except (OSError,subprocess.SubprocessError,UnicodeError):
+        return None
+
+
 def gates(p):
     cases=p['cases']; critical=[c for c in cases if c['priority']=='P0']; latest={r['case_id']:r for r in p['runs']}
-    return [bool(p['notes'].get('0')),bool(p['risks']),bool(cases) and all(c['expected'] for c in cases) and all(any(c['risk_id']==r['id'] and c['priority']=='P0' for c in cases) for r in p['risks'] if r['priority']=='P0'),bool(p['notes'].get('3')),bool(cases) and all(c['automation_ref'] for c in critical) and any(c['automation_ref'] for c in cases),bool(critical) and all(c['id'] in latest and latest[c['id']]['result']=='PASS' and latest[c['id']]['evidence'] for c in critical),bool(p['notes'].get('6')) and not any(b['status']=='OPEN' and b['severity']=='P0' for b in p['bugs']),bool(p['notes'].get('7'))]
+    return [bool(p['notes'].get('0')),bool(p['risks']),bool(cases) and all(c['expected'] for c in cases) and all(any(c['risk_id']==r['id'] and c['priority']=='P0' for c in cases) for r in p['risks'] if r['priority']=='P0'),bool(p['notes'].get('3')),bool(cases) and all(c['automation_ref'] for c in critical) and any(c['automation_ref'] for c in cases),bool(critical) and all(c['id'] in latest and latest[c['id']]['result']=='PASS' and latest[c['id']]['evidence'] for c in critical),bool(p['notes'].get('6')) and (review_ok(p) or (p['stage']>=7 and 'review' not in p)) and not any(b['status']=='OPEN' and b['severity']=='P0' for b in p['bugs']),bool(p['notes'].get('7'))]
 
 def mutate(s,action,d):
     if not isinstance(d,dict): raise ValueError('Payload must be an object')
     if action=='project':
-        p={'id':uid(),'name':clean(d.get('name'),'name',100),'repo':clean(d.get('repo',''),'repo',500,False),'mode':choice(d.get('mode','LEARN'),MODES,'mode'),'stage':0,'notes':{},'risks':[],'cases':[],'runs':[],'bugs':[],'tasks':[],'demo':False,'created':now()}; s['projects'].append(p); return p
+        p={'id':uid(),'name':clean(d.get('name'),'name',100),'repo':clean(d.get('repo',''),'repo',500,False),'mode':choice(d.get('mode','LEARN'),MODES,'mode'),'stage':0,'notes':{},'risks':[],'cases':[],'runs':[],'bugs':[],'tasks':[],'demo':False,'created':now(),'memory':{},'impact_map':{},'review':{},'checkpoint':{'stage':0,'status':'pending','detail':'','updated':now()},'history':[]}; s['projects'].append(p); return p
     p=project(s,d.get('project_id')); row={'id':uid(),'created':now()}
     if action=='mode': p['mode']=choice(d.get('mode'),MODES,'mode')
+    elif action=='checkpoint':
+        checkpoint(p,choice(d.get('status'),['pending','working','blocked','paused'],'status'),clean(d.get('detail',''),'detail',3000,False))
+    elif action=='memory':
+        key=choice(d.get('key'),['architecture','stack','commands','environment','conventions','known_risks','lessons'],'memory key')
+        p.setdefault('memory',{})[key]={'text':clean(d.get('text'),'memory',8000),'source':clean(d.get('source'),'source',500),'updated':now()}
+    elif action=='impact-map':
+        path=clean(d.get('path'),'path',500)
+        if pathlib.PurePosixPath(path).is_absolute() or '..' in pathlib.PurePosixPath(path).parts or '\\' in path:raise ValueError('Use a relative Git path')
+        ids=d.get('case_ids')
+        if not isinstance(ids,list) or not ids or not all(isinstance(i,str) for i in ids):raise ValueError('Expected nonempty case_ids')
+        for i in ids:item(p['cases'],i)
+        p.setdefault('impact_map',{})[path]=sorted(set(ids))
+    elif action=='review-result':
+        if p['stage']!=6:raise ValueError('Review is recorded only at stage 6')
+        if not all(gates(p)[:6]):raise ValueError('Earlier gates are not satisfied')
+        if d.get('fingerprint')!=review_hash(p):raise ValueError('Evidence changed; review again')
+        p['review']={'verdict':choice(d.get('verdict'),['ACCEPT','REVISE'],'verdict'),'method':choice(d.get('method'),['independent','self-review'],'method'),'reviewer':clean(d.get('reviewer'),'reviewer',200),'findings':clean(d.get('findings'),'findings',8000),'fingerprint':d['fingerprint'],'updated':now()}
+    elif action=='new-cycle':
+        if p['stage']!=8:raise ValueError('Complete the current cycle first')
+        # Preserve prior evidence; do not let old PASS results satisfy new gates.
+        p.setdefault('history',[]).append({k:p.get(k) for k in ('notes','runs','review','baseline','checkpoint')})
+        p['stage']=0;p['notes']={};p['runs']=[];p['review']={}
+        checkpoint(p)
+
     elif action=='note':
         stage=d.get('stage');
         if type(stage) is not int or not 0<=stage<len(STAGES): raise ValueError('Invalid stage')
@@ -79,6 +152,8 @@ def mutate(s,action,d):
         if i>=8: raise ValueError('Workflow already complete')
         if blocked: raise ValueError('Missing gate(s): '+', '.join(blocked))
         p['stage']+=1
+        checkpoint(p,'complete' if p['stage']==8 else 'pending')
+        if p['stage']==8:p['baseline']=current_baseline(p)
     elif action=='risk':
         row.update(title=clean(d.get('title'),'title',200),priority=choice(d.get('priority'),['P0','P1','P2'],'priority'),reason=clean(d.get('reason'),'reason'));p['risks'].append(row);return row
     elif action=='case':
@@ -108,13 +183,15 @@ def apply(action,d):
 
 def snapshot():
     s=read()
-    for p in s['projects']:p['gates']=gates(p)
+    for p in s['projects']:
+        p['gates']=gates(p);p['review_fingerprint']=review_hash(p)
     return s
 
 def report(p):
     out=[f'# {p["name"]} — QA report',f'Mode: {p["mode"]} | Project ID: {p["id"]}', 'DEMO / synthetic data' if p['demo'] else 'Recorded evidence is user/agent supplied; not independently verified.', '', '## Workflow']
     out += [f'- [{"x" if v else " "}] {name}' for name,v in zip(STAGES,gates(p))]
     for k,v in p['notes'].items(): out += [f'### {STAGES[int(k)]}',v]
+    out += ['', '## Review', json.dumps(p.get('review',{}),ensure_ascii=False), '## Checkpoint', json.dumps(p.get('checkpoint',{}),ensure_ascii=False)]
     for key,title in [('risks','Risks'),('cases','Test cases'),('runs','Recorded runs'),('bugs','Defects'),('tasks','Learning tasks')]:
         out += ['',f'## {title}']
         for x in p[key]:out += ['','### '+x.get('title',x.get('result',x['id']))]+[f'- {k}: {v}' for k,v in x.items() if k!='title']
@@ -232,6 +309,7 @@ def main():
         p=sub.add_parser(cmd);p.add_argument('--port',type=int,default=8766);p.add_argument('--no-browser',action='store_true')
         if cmd=='start':p.add_argument('mode',nargs='?',choices=MODES)
     sub.add_parser('list');sub.add_parser('demo');p=sub.add_parser('report');p.add_argument('project_id');p=sub.add_parser('apply',help='Apply a validated action from JSON file or stdin (-)');p.add_argument('action');p.add_argument('file');p=sub.add_parser('install-skill');p.add_argument('target',choices=['codex','claude','both']);p.add_argument('--project',default='.');p.add_argument('--global',dest='global_scope',action='store_true')
+    p=sub.add_parser('impact');p.add_argument('project_id')
     sub.add_parser('model-config')
     p=sub.add_parser('model-config-set');p.add_argument('file')
     p=sub.add_parser('model-plan');p.add_argument('file')
@@ -249,6 +327,7 @@ def main():
             data=json.load(sys.stdin) if a.file=='-' else json.loads(pathlib.Path(a.file).read_text(encoding='utf-8-sig'))
             result=model_router.save(data) if a.cmd=='model-config-set' else model_router.plan(model_router.load(),data)
             print(json.dumps(result,ensure_ascii=False,indent=2))
+        elif a.cmd=='impact':print(json.dumps(impact(project(read(),a.project_id)),ensure_ascii=True,indent=2))
         elif a.cmd=='list':print(json.dumps(snapshot(),ensure_ascii=False,indent=2))
         elif a.cmd=='demo':print(demo()['id'])
         elif a.cmd=='report':print(report(project(read(),a.project_id)))

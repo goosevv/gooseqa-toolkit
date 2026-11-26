@@ -23,3 +23,7 @@ Example:
 {"name":"BugRepConstruct","repo":"C:/Projects/BugRepConstruct","mode":"LEARN"}
 ```
 Gate 0: discovery note; 1: risks; 2: cases with expected result and P0 risk links; 3: automation plan note; 4: code links for P0 cases and at least one linked test; 5: every P0 case latest PASS with evidence; 6: review note and no open P0 defects; 7: CI/report note. These are record checks, not independent verification. Progress counts completed stages; later evidence can invalidate previously satisfied gates. Never advance based solely on a checkbox. A project with no P0 case cannot meet execution gate; document this limitation rather than fabricate priority.
+
+## Persistent QA extensions
+
+See [persistent QA](persistent-qa.md) for checkpoint, memory, impact-map, review-result and new-cycle payloads. For new or unfinished projects, gate 6 additionally requires a current ACCEPT review bound to the recorded evidence fingerprint. Completed legacy reviews remain readable. `impact ID` returns a conservative proposed selection; it never executes tests.
