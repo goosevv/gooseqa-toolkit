@@ -68,7 +68,7 @@ Open a target project in Codex and invoke:
 $gooseqa start
 ```
 
-GooseQA creates or resumes the QA workspace, starts a local dashboard, requests browser opening, and guides the agent through the next QA stage.
+GooseQA creates or resumes the QA workspace, starts a local dashboard, prefers the agent’s in-app browser when supported, and guides the agent through the next QA stage.
 
 | Mode | Purpose |
 | --- | --- |
@@ -111,7 +111,7 @@ Choose the right testing level for the project: UI, API, unit, integration, visu
 | Local-first runtime | Python standard library, no additional AI API keys or hosted backend. |
 | Reporting | Export a Markdown QA report. |
 
-The dashboard refreshes every three seconds, includes light and dark themes, and currently uses a Russian-language interface.
+The dashboard has a compact responsive layout, collapsible navigation in narrow panes, locally embedded Iconify (Lucide) icons, light/dark themes, and a Russian-language interface. It polls the local state every three seconds while visible and avoids refreshing focused form controls.
 
 ## Commands
 
@@ -148,7 +148,7 @@ From a target project's root, run the installed skill script (example for a glob
 python ~/.agents/skills/gooseqa/scripts/qa.py start LEARN
 ```
 
-If the browser does not open, use the returned dashboard URL. Add `--no-browser` for headless environments.
+In an agent with an in-app browser, the skill starts with `--no-browser` and opens the returned HTTP URL using the host preview/browser tools when available. Otherwise use the returned dashboard URL or the default external-browser request. Local loopback accessibility depends on the client and execution environment; no public tunnel is required or enabled.
 
 From the toolkit repository:
 
