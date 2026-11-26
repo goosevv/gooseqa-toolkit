@@ -10,8 +10,11 @@ runs real checks, and reviews results — with a local dashboard to track every 
 ![Runtime](https://img.shields.io/badge/runtime-v0.3.0-087f73)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 ![Codex](https://img.shields.io/badge/Agent-Codex-18181B)
+![Claude Code](https://img.shields.io/badge/Agent-Claude%20Code-D97757)
 ![Languages](https://img.shields.io/badge/Dashboard-EN%20%7C%20RU-087f73)
 ![Local first](https://img.shields.io/badge/local--first-yes-087f73)
+
+**English** | [Русский](README.ru.md)
 
 [Install](#installation) · [Quick start](#quick-start) · [Workflow](#workflow) · [Dashboard](#dashboard) · [Model routing](#model-routing) · [Commands](#commands)
 
@@ -32,13 +35,42 @@ Supports QA planning for web UI, API, unit, integration, visual, desktop, game, 
 
 ## Installation
 
-Requires Python 3.10+, Git, and Node.js for the skills CLI.
+Requires Python 3.10+, Git, and Node.js (with npm/npx) for the skills CLI. Install and sign in to your preferred coding agent first.
 
-Install globally for Codex:
+### Codex
+
+Install globally:
 
 ```sh
 npx skills add goosevv/gooseqa-toolkit --skill gooseqa -g -y -a codex
 ```
+
+### Claude Code
+
+1. With [Claude Code](https://code.claude.com/docs/en/quickstart) installed, open a terminal and install the skill globally:
+
+   ```sh
+   npx skills add goosevv/gooseqa-toolkit --skill gooseqa -g -y -a claude-code
+   ```
+
+2. Open your target project in Claude Code (replace `/path/to/project` with its path):
+
+   ```sh
+   cd /path/to/project
+   claude
+   ```
+
+3. In the Claude Code session, run:
+
+   ```text
+   /gooseqa start AUTO
+   ```
+
+   Use `LEARN` or `PAIR` instead for guided or collaborative work.
+
+Omit `-g` and run the installer from your target project for a project-only installation. The global skill is available under `~/.claude/skills/gooseqa/`. If the command is not recognized, check the installation and reopen Claude Code.
+
+Claude Code integration is experimental; native subagent capabilities and dashboard preview support depend on the client. See the [skills CLI](https://github.com/vercel-labs/skills) and [Claude Code skill documentation](https://code.claude.com/docs/en/skills).
 
 <details>
 <summary>Alternative installation methods</summary>
@@ -61,15 +93,15 @@ codex plugin marketplace add goosevv/gooseqa-toolkit
 
 Select GooseQA Toolkit from the added marketplace. Native marketplace installation still requires verification.
 
-### Claude Code (experimental)
+### Claude Code — local installer
 
-From the cloned repository:
+From the cloned repository (use this instead of the skills CLI):
 
 ```sh
 python qa.py install-skill claude --global
 ```
 
-Invoke `/gooseqa start` in Claude Code.
+Open the target project in Claude Code and invoke `/gooseqa start`.
 
 Choose one installation method per agent to avoid duplicate skills.
 
@@ -77,10 +109,18 @@ Choose one installation method per agent to avoid duplicate skills.
 
 ## Quick start
 
-Open the project you want to test in Codex:
+Open the project you want to test and invoke the skill in your agent.
+
+**Codex:**
 
 ```text
 $gooseqa start AUTO
+```
+
+**Claude Code:**
+
+```text
+/gooseqa start AUTO
 ```
 
 GooseQA creates or resumes the local QA workspace, opens the dashboard when supported, and starts the workflow within the approved testing scope.
