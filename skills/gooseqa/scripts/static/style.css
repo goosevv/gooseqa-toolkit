@@ -110,3 +110,5 @@ footer{margin-top:24px;color:var(--muted);font-size:11px}
 .language-control{display:flex;align-items:center;gap:5px;flex:0 0 auto;max-width:100%;color:var(--muted)}
 .language-control select{width:auto;min-height:36px;padding:5px 7px;font-weight:600;cursor:pointer}
 .language-control #language-icon{display:inline-flex;align-items:center}
+
+#ai-form{max-width:680px}#ai-form .task{align-items:center;margin:12px 0}#ai-form .task input{width:18px;height:18px}#ai-mappings[hidden]{display:none}
