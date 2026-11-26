@@ -20,9 +20,7 @@ textarea{min-height:88px;resize:vertical}
 .shell>*,.brand>*,.project-row>*,header>*,.hero>*,.card-head>*,.entry-top>*,.stage>*,.layout>*,.metrics>*,.stack>*,.head-actions>*,.actions>*{min-width:0}
 aside{background:var(--panel);border-right:1px solid var(--line);padding:20px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto}
 .brand{display:flex;gap:10px;align-items:center;margin-bottom:28px}
-.mark{width:36px;height:36px;flex:none;background:#087f73;color:white;font-size:22px;font-weight:800;border-radius:8px;display:grid;place-items:center;position:relative}
-.mark span{position:absolute;right:1px;bottom:1px;display:grid;place-items:center;background:#087f73;border-radius:4px}
-.mark .icon{width:13px;height:13px}
+.mark{display:block;width:40px;height:40px;flex:none;object-fit:contain}
 .brand-name{flex:1}
 .brand strong{display:block;font-size:18px;letter-spacing:-.5px;line-height:1.2}
 small,.eyebrow,.workspace-label{color:var(--muted);font-size:12px;font-weight:500;overflow-wrap:anywhere}

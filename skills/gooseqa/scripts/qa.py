@@ -138,9 +138,9 @@ class Handler(BaseHTTPRequestHandler):
             if path=='/api/models':return self.send(200,model_router.load())
             if path.startswith('/api/report/'):
                 p=project(read(),path.split('/')[-1]);return self.send(200,report(p).encode(),'text/plain; charset=utf-8')
-            files={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css')}
+            files={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css'),'/gooseqa-logo.png':('gooseqa-logo.png','image/png')}
             if path in files:
-                f,t=files[path];return self.send(200,(ROOT/'static'/f).read_bytes(),t+'; charset=utf-8')
+                f,t=files[path];return self.send(200,(ROOT/'static'/f).read_bytes(),t if t.startswith('image/') else t+'; charset=utf-8')
             self.send(404,{'error':'Not found'})
         except (ValueError,KeyError,OSError) as e:self.send(400,{'error':str(e)})
     def do_POST(self):

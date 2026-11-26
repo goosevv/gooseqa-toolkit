@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🪿 GooseQA Toolkit
+<img src="static/gooseqa-logo.png" alt="GooseQA logo" width="112" height="112">
+
+# GooseQA Toolkit
 
 **From an unfamiliar codebase to a reliable test suite.**
 

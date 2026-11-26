@@ -61,6 +61,10 @@ class QA(unittest.TestCase):
         try:
             for path in ['/','/app.js','/style.css','/api/state','/api/report/'+self.pid]:
                 with urllib.request.urlopen(base+path) as r:self.assertEqual(r.status,200);self.assertTrue(r.read())
+            with urllib.request.urlopen(base+'/gooseqa-logo.png') as r:
+                self.assertEqual(r.status,200)
+                self.assertEqual(r.headers.get_content_type(),'image/png')
+                self.assertTrue(r.read().startswith(b'\x89PNG\r\n\x1a\n'))
             body=json.dumps({'project_id':self.pid,'mode':'PAIR'}).encode();req=urllib.request.Request(base+'/api/action/mode',data=body,headers={'Content-Type':'application/json','Origin':base});self.assertEqual(urllib.request.urlopen(req).status,200)
             req=urllib.request.Request(base+'/api/action/mode',data=body,headers={'Content-Type':'application/json','Origin':'https://evil.example'});self.assertRaises(urllib.error.HTTPError,urllib.request.urlopen,req)
         finally:server.shutdown();server.server_close();t.join()
