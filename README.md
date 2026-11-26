@@ -9,7 +9,7 @@
 An AI-assisted QA workflow that discovers risks, designs tests, implements automation,
 runs real checks, and reviews results — with a local dashboard to track every stage.
 
-![Runtime](https://img.shields.io/badge/runtime-v0.3.0-087f73)
+![Runtime](https://img.shields.io/badge/runtime-v0.4.0-087f73)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 ![Codex](https://img.shields.io/badge/Agent-Codex-18181B)
 ![Claude Code](https://img.shields.io/badge/Agent-Claude%20Code-D97757)
@@ -158,6 +158,15 @@ flowchart TD
 Each stage requires genuine completion and satisfied evidence gates. In AUTO, the agent advances automatically, attempts bounded safe corrections when blocked, and saves progress before stopping. A subsequent invocation resumes the saved stage.
 
 The workflow runs in the active agent session; it is not a detached background AI process. Quality gates validate recorded evidence, not the correctness of the test assertions.
+
+### Persistent QA workflow
+
+- **Smart Resume** — persistent stage checkpoints and blocker details; inspect actual changes before retrying.
+- **Project Memory** — local, sourced architecture, commands, conventions and lessons across cycles.
+- **Incremental Testing** — Git-based candidate selection using a reviewed clean baseline and verified file-to-case mappings; unknown changes fall back to full testing, P0 always included.
+- **QA Reviewer** — evidence-bound review gate, distinct native reviewer when available, explicitly labeled self-review otherwise.
+
+Use `$gooseqa cycle` (Claude: `/gooseqa cycle`) after a completed cycle. The agent verifies impact and executes the chosen tests; the CLI does not run tests or dispatch agents itself. [Persistent QA guide](skills/gooseqa/references/persistent-qa.md).
 
 ## Dashboard
 
