@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "scope": "all GooseQA workflows in Codex, independent of target project",
+  "provider": "codex",
+  "orchestrator": {
+    "model": "gpt-6.2-sol",
+    "reasoning_effort": "medium"
+  },
+  "roles": {
+    "explorer": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "test_designer": {
+      "model": "gpt-6.2-sol",
+      "reasoning_effort": "medium"
+    },
+    "test_engineer": {
+      "model": "gpt-6.2-sol",
+      "reasoning_effort": "medium"
+    },
+    "visual_analyst": {
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "low"
+    },
+    "reviewer": {
+      "model": "gpt-6.2-sol",
+      "reasoning_effort": "medium"
+    },
+    "documentation": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "low"
+    },
+    "test_runner": {
+      "model": null,
+      "reasoning_effort": null,
+      "execution": "local CLI"
+    }
+  },
+  "constraints": {
+    "max_reasoning_effort": "medium",
+    "allow_astra": false,
+    "default_profile": "BALANCED",
+    "max_concurrent_subagents": 2,
+    "profiles": {
+      "ECO": {
+        "max_concurrent_subagents": 0
+      },
+      "BALANCED": {
+        "max_concurrent_subagents": 2
+      },
+      "QUALITY": {
+        "max_concurrent_subagents": 4
+      }
+    },
+    "allow_silent_model_fallback": false
+  },
+  "claude": {
+    "status": "deferred",
+    "inherit_codex_policy": false
+  }
+}
